@@ -46,3 +46,55 @@ This project implements those core responsibilities at small scale, aiming to de
   - `factory/line1/data` — `{"temperature":..,"humidity":..}` JSON
 
 ---
+## Requirements
+
+```bash
+# Ubuntu
+sudo apt-get update
+sudo apt-get install -y g++ mosquitto mosquitto-clients libmosquitto-dev
+sudo apt install python3-paho-mqtt
+```
+
+---
+## Build
+```bash
+g++ -std=c++17 -Wall -Wextra -O2 sensor/sensor.cpp   -o sensor/sensor
+g++ -std=c++17 -Wall -Wextra -O2 gateway/gateway.cpp -o gateway/gateway -lmosquitto
+```
+
+---
+## RUN
+# terminal 0 — broker
+mosquitto -p 1883
+
+# terminal 1 — subscriber
+python3 subscriber/subscriber.py localhost 1883 data/readings.csv
+
+# terminal 2 — gateway
+cd gateway && ./gateway ../data/sensor_data.txt ../logs/gateway.log localhost 1883
+
+# terminal 3 — sensor
+cd sensor && ./sensor ../data/sensor_data.txt 3 0
+---
+**Subscriber report**:
+```
+===== REPORT =====
+Total messages: 8
+Average temp: 25.8
+Max temp: 32
+Min temp: 20
+Average humidity: 58.5
+Max humidity: 70
+Min humidity: 47
+Invalid readings: 0
+==================
+```
+
+**Stored CSV** (`readings.csv`):
+```
+time,temp,humidity
+07:57:57,26,69
+07:57:58,20,58
+07:57:59,32,56
+...
+```
