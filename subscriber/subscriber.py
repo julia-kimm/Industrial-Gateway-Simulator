@@ -5,6 +5,7 @@ import json
 import signal
 import datetime
 from pathlib import Path
+import time
 
 import paho.mqtt.client as mqtt
 
@@ -23,6 +24,7 @@ class Analyzer:
         self.csv_path = csv_path
         self.temps: list[int] = []
         self.humidities: list[int] = []
+        self.timestamps: list[float] = []
         self.count = 0
         self.invalid = 0  # failed to parse or missing fields
 
@@ -32,16 +34,17 @@ class Analyzer:
         self._fh = open(csv_path, "a", newline="")
         self._writer = csv.writer(self._fh)
         if new_file:
-            self._writer.writerow(["time", "temp", "humidity"])
+            self._writer.writerow(["time", "temp", "humidity", "timestamp"])
             self._fh.flush()
 
-    def add(self, temperature: int, humidity: int) -> None:
+    def add(self, temperature: int, humidity: int, timestamp: float) -> None:
         now = datetime.datetime.now().strftime("%H:%M:%S")
-        self._writer.writerow([now, temperature, humidity])
+        self._writer.writerow([now, temperature, humidity, timestamp])
         self._fh.flush()
 
         self.temps.append(temperature)
         self.humidities.append(humidity)
+        self.timestamps.append(timestamp)
         self.count += 1
 
     def mark_invalid(self) -> None:
@@ -84,19 +87,23 @@ def main() -> None:
             print(f"[SUBSCRIBER][ERROR] connect failed rc={reason_code}")
 
     def on_message(client, userdata, msg):
+        received_time = time.time()
         payload = msg.payload.decode("utf-8", errors="replace")
         try:
             data = json.loads(payload)
             temp = int(data["temperature"])
             humi = int(data["humidity"])
+            timestamp = float(data["timestamp"])
         except (ValueError, KeyError, json.JSONDecodeError):
             analyzer.mark_invalid()
             print(f"[SUBSCRIBER][ERROR] bad payload: {payload!r}")
             return
+        
+        latency_ms = (received_time - timestamp) * 1000
 
-        analyzer.add(temp, humi)
+        analyzer.add(temp, humi, latency_ms)
         print(f"[SUBSCRIBER] saved  temp={temp}  humidity={humi}  "
-              f"(total={analyzer.count})")
+              f"latency={latency_ms:.1f} ms (total={analyzer.count})")
 
         if analyzer.count % REPORT_EVERY == 0:
             print(analyzer.report())

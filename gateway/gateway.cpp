@@ -7,11 +7,13 @@
 #include <ctime>
 #include <csignal>
 #include <mosquitto.h>
+#include <iomanip>
 
 //Parsed measurement
 struct Reading {
     int temperature;
     int humidity;
+    double timestamp;
     bool parsed_ok;
 };
 
@@ -55,13 +57,14 @@ private:
 
 // parse one line of "temp,humidity" and return a Reading struct. If parsing fails, parsed_ok is set to false.
 static Reading parse_line(const std::string& line) {
-    Reading r{0, 0, false};
+    Reading r{0, 0, 0.0, false};
     std::stringstream ss(line);
-    std::string temp_str, humi_str;
-    if (std::getline(ss, temp_str, ',') && std::getline(ss, humi_str)) {
+    std::string temp_str, humi_str, timestamp_str;
+    if (std::getline(ss, temp_str, ',') && std::getline(ss, humi_str, ',') && std::getline(ss, timestamp_str)) {
         try {
             r.temperature = std::stoi(temp_str);
             r.humidity = std::stoi(humi_str);
+            r.timestamp = std::stod(timestamp_str);
             r.parsed_ok = true;
         } catch (const std::exception&) {
             r.parsed_ok = false;
@@ -148,7 +151,7 @@ int main(int argc, char* argv[]) {
             std::string temp_payload = std::to_string(r.temperature);
             std::string humi_payload = std::to_string(r.humidity);
             std::ostringstream json;
-            json << "{\"temperature\":" << r.temperature << ",\"humidity\":" << r.humidity << "}";
+            json << "{\"temperature\":" << r.temperature << ",\"humidity\":" << r.humidity << ",\"timestamp\":" << std::fixed << std::setprecision(2) << r.timestamp << "}";
             std::string json_payload = json.str();
 
             int rc1 = mosquitto_publish(mosq, nullptr, "factory/line1/temperature", (int)temp_payload.size(), temp_payload.c_str(), 0, false);

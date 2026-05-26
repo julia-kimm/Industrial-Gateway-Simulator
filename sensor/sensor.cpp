@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include <csignal>
+#include <iomanip>
 
 struct SensorData {
     int temperature;
@@ -72,17 +73,19 @@ int main(int argc, char* argv[]) {
     while (g_running && (num_samples == 0 || produced < num_samples)) {
         SensorData s = generate_sample(rng);
 
-        //1. append "temp,humidity\n" to the output file
+        //1. append "temp,humidity,timestamp    \n" to the output file
         std::ofstream out(output_file, std::ios::app);
         if (!out) {
             std::cerr << "[SENSOR][ERROR] cannot open output file: " << output_file << std::endl;
             return 1;
         }
-        out << s.temperature << "," << s.humidity << "\n";
+        auto now = std::chrono::system_clock::now();
+        double timestamp = std::chrono::duration<double>(now.time_since_epoch()).count();
+        out << std::fixed << std::setprecision(2) << s.temperature << "," << s.humidity << "," << timestamp << "\n";
         out.close();
 
         //2. print to stdout in the same format
-        std::cout << s.temperature << "," << s.humidity << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << s.temperature << "," << s.humidity << "," << timestamp << std::endl;
 
         ++produced;
         if (num_samples != 0 && produced >= num_samples) break;
