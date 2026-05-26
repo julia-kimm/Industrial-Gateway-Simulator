@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
             std::string temp_payload = std::to_string(r.temperature);
             std::string humi_payload = std::to_string(r.humidity);
             std::ostringstream json;
-            json << "{\"temperature\":" << r.temperature << ",\"humidity\":" << r.humidity << ",\"timestamp\":" << std::fixed << std::setprecision(2) << r.timestamp << "}";
+            json << "{\"temperature\":" << r.temperature << ",\"humidity\":" << r.humidity << ",\"timestamp\":" << std::fixed << std::setprecision(6) << r.timestamp << "}";
             std::string json_payload = json.str();
 
             int rc1 = mosquitto_publish(mosq, nullptr, "factory/line1/temperature", (int)temp_payload.size(), temp_payload.c_str(), 0, false);

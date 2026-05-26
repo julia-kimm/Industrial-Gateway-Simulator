@@ -81,11 +81,11 @@ int main(int argc, char* argv[]) {
         }
         auto now = std::chrono::system_clock::now();
         double timestamp = std::chrono::duration<double>(now.time_since_epoch()).count();
-        out << std::fixed << std::setprecision(2) << s.temperature << "," << s.humidity << "," << timestamp << "\n";
+        out << std::fixed << std::setprecision(6) << s.temperature << "," << s.humidity << "," << timestamp << "\n";
         out.close();
 
         //2. print to stdout in the same format
-        std::cout << std::fixed << std::setprecision(2) << s.temperature << "," << s.humidity << "," << timestamp << std::endl;
+        std::cout << std::fixed << std::setprecision(6) << s.temperature << "," << s.humidity << "," << timestamp << std::endl;
 
         ++produced;
         if (num_samples != 0 && produced >= num_samples) break;
