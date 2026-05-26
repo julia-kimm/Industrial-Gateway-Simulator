@@ -2,7 +2,7 @@
 
 A simulator that reproduces the typical data flow of an industrial IoT gateway.
 
-A sensor generates data, the gateway validates and logs it before transmitting MQTT, and a Python subscriber stores, analyzes, and reports the data.
+A sensor generates data, the gateway validates and logs it before transmitting MQTT, and a Python subscriber stores, analyzes, and computes communication delay for each message.
 
 > It uses a real Mosquitto broker, limosquitto(C++), and paho-mqtt (Python) - a genuine MQTT stack, not faked communication
 
@@ -97,9 +97,12 @@ Invalid readings: 0
 
 **Stored CSV** (`readings.csv`):
 ```
-time,temp,humidity
-07:57:57,26,69
-07:57:58,20,58
-07:57:59,32,56
+time,temp,humidity,timestamp
+02:25:02,20,51,94.79570388793945
+02:25:05,32,51,58.47668647766113
+02:25:08,71,66,74.88608360290527
+02:25:11,23,57,78.40442657470703
+02:25:14,24,50,88.35744857788086
+02:25:17,24,70,94.64859962463379
 ...
 ```
