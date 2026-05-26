@@ -64,17 +64,22 @@ g++ -std=c++17 -Wall -Wextra -O2 gateway/gateway.cpp -o gateway/gateway -lmosqui
 
 ---
 ## RUN
-# terminal 0 — broker
-mosquitto -p 1883
+terminal 0 — broker
 
-# terminal 1 — subscriber
-python3 subscriber/subscriber.py localhost 1883 data/readings.csv
+`mosquitto -p 1883`
 
-# terminal 2 — gateway
-cd gateway && ./gateway ../data/sensor_data.txt ../logs/gateway.log localhost 1883
+terminal 1 — subscriber
 
-# terminal 3 — sensor
-cd sensor && ./sensor ../data/sensor_data.txt 3 0
+`python3 subscriber/subscriber.py localhost 1883 data/readings.csv`
+
+terminal 2 — gateway
+
+`cd gateway && ./gateway ../data/sensor_data.txt ../logs/gateway.log localhost 1883`
+
+terminal 3 — sensor
+
+`cd sensor && ./sensor ../data/sensor_data.txt 3 0`
+
 ---
 **Subscriber report**:
 ```
